@@ -50,17 +50,16 @@ def handle_client(person):
             msg = client.recv(BUFFSIZ)
             # print(f"{name}: ", msg.decode("utf8"))
 
-            if msg == bytes("{quit}", "utf8"):
-                client.send(bytes("{quit}", "utf8"))
+            if msg == bytes("{quit}", "utf8"): # disconnect client if message is quit
                 client.close()
                 persons.remove(person)
-                broadcast(bytes(f"{name} has left the chat...", ""))
+                broadcast(bytes(f"{name} has left the chat...", "utf8"), "")
 
                 print(f"[DISCONNECTED] {name} disconnected")
                 break
             else:
                 broadcast(msg, name+": ")
-                print(f"{name}: ", msg.decode("utf8"))
+                print(f"{name}:", msg.decode("utf8"))
         except Exception as e:
             print("[EXCEPTION]", e)
             break
@@ -74,8 +73,8 @@ def wait_for_connection(SERVER):
     """
     while True:
         try:
-            client, addr = SERVER.accept()
-            person = Person(addr, client)
+            client, addr = SERVER.accept() # wait for new connections
+            person = Person(addr, client) # new person created for connection
             persons.append(person)
             print(f"[CONNECTION] {addr} connected to server at {time.time()}")
             Thread(target=handle_client, args=(person,)).start()
@@ -86,7 +85,7 @@ def wait_for_connection(SERVER):
 
 
 if __name__ == "__main__":
-    SERVER.listen(MAX_CONNECTIONS)
+    SERVER.listen(MAX_CONNECTIONS) # open server for listening to connections
     print("[STARTED] Waiting for connections...")
     ACCEPT_THREAD = Thread(target=wait_for_connection, args=(SERVER,))
     ACCEPT_THREAD.start()
